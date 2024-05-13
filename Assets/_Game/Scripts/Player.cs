@@ -32,6 +32,11 @@ public class Player : Character
         if(IsDead) {
             return;
         }
+
+        if(!isRegenable)
+        {
+            SetupRegenHpTime();
+        }
         
         isGrounded = CheckGrounded();
         
@@ -92,6 +97,18 @@ public class Player : Character
         DeactiveAttackArea();
         SavePoint();
         UIManager.instance.SetCoin(coin);
+    }
+
+    private void onRegen()
+    {
+        base.onRegen(HP_REGEN_AMOUNT);
+    }
+
+    public void SetupRegenHpTime()
+    {
+        CancelInvoke(nameof(onRegen));
+        InvokeRepeating(nameof(onRegen), HP_REGEN_DELAY, HP_REGEN_RATE_BY_SEC);
+        isRegenable = true;
     }
 
     public void SetMove(float horizontal) {

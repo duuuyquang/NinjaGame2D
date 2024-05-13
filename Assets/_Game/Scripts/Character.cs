@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class Character : MonoBehaviour
 {
+    public const float HP_REGEN_AMOUNT = 10f;
+    public const float HP_REGEN_RATE_BY_SEC = 1f;
+    public const float HP_REGEN_DELAY = 3f;
+
+    private const int HP_MAX = 100;
+
     [SerializeField] private Animator anim;
     [SerializeField] protected HealthBar healthBar;
 
@@ -11,6 +17,7 @@ public class Character : MonoBehaviour
 
     private float hp;
     private string curAnimName;
+    protected bool isRegenable;
 
     public bool IsDead => hp <= 0;
 
@@ -19,8 +26,8 @@ public class Character : MonoBehaviour
     }
 
     public virtual void OnInit() {
-        hp = 100;
-        healthBar.OnInit(100, transform);
+        hp = HP_MAX;
+        healthBar.OnInit(hp, transform);
     }
 
     protected virtual void OnDespawn() {
@@ -51,6 +58,22 @@ public class Character : MonoBehaviour
 
             healthBar.SetNewHp(hp);
             Instantiate(combatTextPrefab, transform.position + Vector3.up, Quaternion.identity).OnInit(damage);
+            isRegenable = false;
+        }
+    }
+
+    public void onRegen(float regenAmount)
+    {
+        if(!IsDead && hp < HP_MAX)
+        {
+            hp = Mathf.Min(hp + regenAmount, HP_MAX);
+            healthBar.SetNewHp(hp);
+            Instantiate(combatTextPrefab, transform.position + Vector3.up, Quaternion.identity).OnInit(regenAmount);
+        }
+
+        if(hp >= HP_MAX)
+        {
+            CancelInvoke(nameof(onRegen));
         }
     }
 }
